@@ -63,4 +63,38 @@ app.post('/add', (req, res) => {
   res.redirect("/")
 })
 
+app.get("/study/select", (req, res) => {
+  const file = fs.readFileSync('./data.json', "utf8")
+  const data = JSON.parse(file) 
+  res.render("st-select", {modules: Object.keys(data)})
+})
+
+app.get("/study/run", (req, res) => {
+  const selectedModule = JSON.parse(decodeURI(req.query.selected)).m
+  const file = fs.readFileSync('./data.json', "utf8")
+  const data = JSON.parse(file)
+  const tasks = data[selectedModule]
+  for (let t of tasks) {
+    t.type = "typing_answer"
+  }
+  res.render("study", {step: Number(req.query.step ?? 0), tasks, selected: selectedModule})
+})
+
+app.post("/study/run", (req, res) => {
+  const {answer, step, selected} = req.body
+  const file = fs.readFileSync('./data.json', "utf8")
+  const data = JSON.parse(file)
+  const tasks = data[selected]
+  for (let t of tasks) {
+    t.type = "typing_answer"
+  }
+  console.log({ answer, step, tasks })
+  if (answer !== tasks[Number(step - 1)].q) {
+    //console.log(step)
+    res.render("mistake", {step: Number(step) - 1, tasks, selected, answer})
+    return
+  }
+  res.render("study", {step, tasks, selected})
+})
+
 app.listen(3000, () => console.log("Server started"))

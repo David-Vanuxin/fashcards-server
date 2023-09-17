@@ -1,0 +1,29 @@
+extends layout
+
+block content
+	form(method="get", action="/study/run")
+		h1 Режим заучивания
+		p Выберите модуль для заучивания
+		if modules.length != 0
+			each m in modules
+				div.buttons-wrapper
+					if modules.length == 1
+						input(type="radio", value={m}, name="selected", checked="checked")
+					else
+						input(type="radio", value={m}, name="selected")
+					label(for="selected") #{m}
+				div.buttons-wrapper
+					input(type="submit", value="Выбрать", class="button")
+					a(class="button", href="/") Отмена
+
+		else
+			p Модулей нет. Чтобы перейти в режим заучивания, создайте новый модуль
+			div.buttons-wrapper
+				a(href='/add', class="button") Создать
+		//- div.buttons-wrapper
+		//- 	label(for="module") Название
+		//- 	input(type="text", name="module", class="text-input", placeholder="Введите здесь", required="on", spellcheck="false")
+		//- textarea(name="text", class="text-area", required="on", spellcheck="false", placeholder="Скопируйте сюда текст модуля")
+		//- div.buttons-wrapper
+		//- 	input(type="submit", value="Добавить", class="button")
+		//- 	a(class="button", href="/") Отмена
