@@ -1,0 +1,19 @@
+extends layout
+
+block content
+	h1 Все модули
+	if modules.length != 0
+		each m in modules
+			if m.length != 0 
+				table
+					caption #{m.name}
+					each task in m.data
+						tr
+							td #{task.q}
+							td #{task.a}
+			else
+				p Модуль пуст
+	else
+		p Модулей нет
+	div.buttons-wrapper
+		a(href='/add', class="button") Новый модуль

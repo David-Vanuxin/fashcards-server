@@ -1,0 +1,12 @@
+extends layout
+
+block content
+	form(method="post", action="/add")
+		h1 Создать новый модуль
+		div.buttons-wrapper
+			label(for="module") Название
+			input(type="text", name="module", class="text-input", placeholder="Введите здесь", required="on", spellcheck="false")
+		textarea(name="text", class="text-area", required="on", spellcheck="false", placeholder="Скопируйте сюда текст модуля")
+		div.buttons-wrapper
+			input(type="submit", value="Добавить", class="button")
+			a(class="button", href="/") Отмена
