@@ -30,10 +30,10 @@ app.get('/add', (req, res) => {
   res.render('add')
 })
 
-const remake = text => {
+const remake = (text, separator = new RegExp(/\s–\s/g)) => {
   let res;
   res = text.replaceAll(/\d+/g, "")
-  res = res.replaceAll(/\s–\s/g, "...")
+  res = res.replaceAll(separator, "...")
   const list = res.split("\n")
   const result = []
   for (let string of list) {
@@ -47,7 +47,17 @@ const remake = text => {
 }
 
 app.post('/add', (req, res) => {
-  let tasks = remake(req.body.text)
+  let tasks;
+  try {
+    tasks = remake(req.body.text)
+  } catch (err) {
+    console.error(err)
+    res.render("error", {code: "Не удалось разобрать данные"})
+    res.status(400)
+    res.end()
+    return
+  }
+
   let file = fs.readFileSync('./data.json', "utf8")
   file = JSON.parse(file)
   for (let t of tasks) {
