@@ -115,3 +115,12 @@ a {
 	color: blue;
 	text-decoration: none;
 }
+
+pre {
+	font-family: "Arial", "Helvetica", "Roboto", sans-serif;
+	font-size: 1em;
+	margin-right: var(--padding-std);
+	margin-top: 0.3rem;
+	margin-left: 0;
+	margin-bottom: 0;
+}
