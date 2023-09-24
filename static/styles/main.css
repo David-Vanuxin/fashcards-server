@@ -27,6 +27,7 @@ table {
 	border-collapse: collapse;
 	box-sizing: border-box;
 	width: 100%;
+	margin-bottom: 1rem;
 }
 td {
 	border: 1px solid #000;
@@ -39,7 +40,7 @@ td {
 }
 
 .text-area {
-	width: 60%;
+	width: 80%;
 	margin-right: var(--padding-std);
 	margin-top: 0.3rem;
 	margin-left: 0;
@@ -116,11 +117,15 @@ a {
 	text-decoration: none;
 }
 
-pre {
+.text {
 	font-family: "Arial", "Helvetica", "Roboto", sans-serif;
 	font-size: 1em;
 	margin-right: var(--padding-std);
 	margin-top: 0.3rem;
 	margin-left: 0;
 	margin-bottom: 0;
+}
+
+ul {
+	padding-left: 1rem;
 }

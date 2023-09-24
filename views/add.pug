@@ -6,6 +6,11 @@ block content
 		div.buttons-wrapper
 			label(for="module") Название
 			input(type="text", name="module", class="text-input", placeholder="Введите здесь", required="on", spellcheck="false")
+		p.text Перед добавлением убедитесь, что:
+		ul.text
+			li Все пары "термин<разделитель>значение" имеют разделитель
+			li Каждая пара начинается с новой строки
+			li Нет переносов строк
 		textarea(name="text", class="text-area", required="on", spellcheck="false", placeholder="Скопируйте сюда текст модуля")
 		div.buttons-wrapper
 			input(type="submit", value="Добавить", class="button")

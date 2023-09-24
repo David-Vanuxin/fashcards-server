@@ -32,6 +32,9 @@ app.get('/add', (req, res) => {
 
 const getReason = string => {
   let reason = ""
+  if (typeof string === "undefined") {
+    return null/*"посторонние символы"*/
+  }
   if (!string.includes("...")) {
     reason += "отсутствует разделитель; "
   }
@@ -51,7 +54,8 @@ const getReason = string => {
 
 const remake = (text, separator = new RegExp(/\s–\s/g)) => {
   let res;
-  res = text.replaceAll(/\d+/g, "")
+  res = text.replaceAll(/^!?[^а-я,А-Я]+/g, "")  
+  res = res.replaceAll(/\d+/g, "")
   res = res.replaceAll(separator, "...")
   const list = res.split("\n")
   const result = []
@@ -65,6 +69,7 @@ const remake = (text, separator = new RegExp(/\s–\s/g)) => {
       })
     } catch (err) {
       const reason = getReason(string)
+      if (reason == null) continue
       const new_list = []
       Object.assign(new_list, list)
       let sample = new_list.splice(n - 2, n + 2).join("\n")
@@ -126,9 +131,7 @@ app.post("/study/run", (req, res) => {
   for (let t of tasks) {
     t.type = "typing_answer"
   }
-  console.log({ answer, step, tasks })
   if (answer !== tasks[Number(step - 1)].q) {
-    //console.log(step)
     res.render("mistake", {step: Number(step) - 1, tasks, selected, answer})
     return
   }
