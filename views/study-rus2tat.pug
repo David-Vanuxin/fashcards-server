@@ -1,0 +1,38 @@
+extends layout
+
+block content
+	h1 Режим заучивания	
+	if tasks[step].type == "typing_answer"
+		form(method="post", action="/study/run")
+			p
+				span Выберите правильный перевод для: 
+				br
+				strong #{tasks[step].q}
+			- const indexes = []
+			- 
+				for (let n = 3; n >= 0; n--) {
+					let randomIndex = Math.floor( Math.random() * tasks.length); 			
+					let exist = indexes.find(elem => elem === randomIndex);
+					if (typeof exist === "undefined") {
+						 indexes.push(randomIndex)
+					} else {
+						n++
+						continue
+					}
+				}
+			- const trueAnswerIndex = indexes.find(i => i === step)
+			- if (typeof trueAnswerIndex === "undefined") indexes[Math.floor( Math.random() * 3 )] = step
+
+			each i in indexes
+				if i >= 0 && i <= tasks.length
+					div.buttons-wrapper
+						label(for="answer")
+							input(type="radio", name="answer", value=tasks[i].a, tabindex=i)
+							span #{tasks[i].a}
+			
+			input(hidden, value=Number(step)+1, name="step")
+			input(hidden, value=selected, name="selected", tabindex="5")
+			input(type="submit", value="Следующий вопрос", class="button")
+
+block scripts
+	script(src="/scripts/click-label.js")

@@ -120,7 +120,12 @@ app.get("/study/run", (req, res) => {
   for (let t of tasks) {
     t.type = "typing_answer"
   }
-  res.render("study", {step: Number(req.query.step ?? 0), tasks, selected: selectedModule})
+  if (req.query.type == "tatar") {
+    res.render("study-tat2rus", {step: Number(req.query.step ?? 0), tasks, selected: selectedModule})
+  }
+  if (req.query.type == "russian") {
+    res.render("study-rus2tat", {step: Number(req.query.step ?? 0), tasks, selected: selectedModule})
+  }
 })
 
 app.post("/study/run", (req, res) => {
@@ -135,7 +140,13 @@ app.post("/study/run", (req, res) => {
     res.render("mistake", {step: Number(step) - 1, tasks, selected, answer})
     return
   }
-  res.render("study", {step, tasks, selected})
+  if (req.query.type == "tatar") {
+    res.render("study-tat2rus", {step, tasks, selected})
+  }
+  if (req.query.type == "russian") {
+    res.render("study-rus2tat", {step, tasks, selected})
+  }
+  //res.render("study", {step, tasks, selected})
 })
 
 app.listen(3000, () => console.log("Server started"))
