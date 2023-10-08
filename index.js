@@ -129,24 +129,30 @@ app.get("/study/run", (req, res) => {
 })
 
 app.post("/study/run", (req, res) => {
-  const {answer, step, selected} = req.body
+  const {answer, step, selected, type} = req.body
   const file = fs.readFileSync('./data.json', "utf8")
   const data = JSON.parse(file)
   const tasks = data[selected]
   for (let t of tasks) {
     t.type = "typing_answer"
   }
-  if (answer !== tasks[Number(step - 1)].q) {
-    res.render("mistake", {step: Number(step) - 1, tasks, selected, answer})
+  if (req.body.type == "tatar") {
+    console.log(answer, tasks[Number(step - 1)].q)
+    if (answer !== tasks[Number(step - 1)].q) {
+      res.render("mistake", {step: Number(step) - 1, tasks, selected, answer})
+      return
+    }
+    res.render("study-tat2rus", {step, tasks, selected})
     return
   }
-  if (req.query.type == "tatar") {
-    res.render("study-tat2rus", {step, tasks, selected})
-  }
-  if (req.query.type == "russian") {
+  if (req.body.type == "russian") {
+    console.log(answer, tasks[Number(step - 1)].a)
+    if (answer !== tasks[Number(step - 1)].a) {
+      res.render("mistake", {step: Number(step) - 1, tasks, selected, answer})
+      return
+    }
     res.render("study-rus2tat", {step, tasks, selected})
   }
-  //res.render("study", {step, tasks, selected})
 })
 
 app.listen(3000, () => console.log("Server started"))
