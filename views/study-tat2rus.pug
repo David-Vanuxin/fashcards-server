@@ -10,18 +10,26 @@ block content
 				strong #{tasks[step].a}
 			- const indexes = []
 			- 
-				for (let n = 3; n >= 0; n--) {
+				for (let n = 0; n <= 3; n++) {
 					let randomIndex = Math.floor( Math.random() * tasks.length); 			
-					let exist = indexes.find(elem => elem === randomIndex);
-					if (typeof exist === "undefined") {
-						 indexes.push(randomIndex)
-					} else {
-						n++
-						continue
-					}
+					indexes.push(randomIndex)
+			 		let exist = indexes.find(elem => elem === randomIndex);
+			 		if (typeof exist === "undefined") {
+			 			indexes.push(randomIndex)
+			 		}
 				}
-			- const trueAnswerIndex = indexes.find(i => i === step)
-			- if (typeof trueAnswerIndex === "undefined") indexes[Math.floor( Math.random() * 3 )] = step
+			//- 	for (let n = 3; n >= 0; n--) {
+			//- 		let randomIndex = Math.floor( Math.random() * tasks.length); 			
+			//- 		let exist = indexes.find(elem => elem === randomIndex);
+			//- 		if (typeof exist === "undefined") {
+			//- 			 indexes.push(randomIndex)
+			//- 		} else {
+			//- 			n++
+			//- 			continue
+			//- 		}
+			//- 	}
+			//- - const trueAnswerIndex = indexes.find(i => i === step)
+			//- - if (typeof trueAnswerIndex === "undefined") indexes[Math.floor( Math.random() * 3 )] = step
 
 			each i in indexes
 				if i >= 0 && i <= tasks.length

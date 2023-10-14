@@ -37,6 +37,8 @@ td {
 
 .nav-link {
 	margin: 0 10px 10px 0;
+	color: blue;
+	text-decoration: none;
 }
 
 .text-area {
@@ -112,9 +114,14 @@ caption {
 	text-align: left;
 }
 
-a {
+.link:visited {
 	color: blue;
-	text-decoration: none;
+}
+
+.link {
+	text-decoration: underline;
+	color: blue;
+	cursor: pointer;
 }
 
 .text {

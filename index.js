@@ -3,6 +3,16 @@ const express = require('express')
 const app = express()
 const fs = require("fs")
 
+const sqlite3 = require("sqlite3")
+const {open} = require('sqlite')
+
+async function openDb () {
+  return open({
+    filename: 'data',
+    driver: sqlite3.Database
+  })
+}
+
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
@@ -13,15 +23,21 @@ app.use(express.static(path.join(__dirname, 'static')))
 
 let todoes = []
 
-app.get('/', (req, res) => {
-  let file = fs.readFileSync('./data.json', "utf8")
-  file = JSON.parse(file)
-  const keys = Object.keys(file)
+app.get('/', async (req, res) => {
+  const db = await openDb()
+  const rows = await db.all("SELECT id, name FROM Modules;")
   const modules = []
-  if (keys.length != 0) {
-    for (let k of keys) {
-      modules.push({name: k, data: file[k]})
-    }
+
+  for (let r of rows) {
+    const terms = []
+
+    const terms_rows = await db.all(`SELECT question, answer FROM Terms WHERE Terms.module=${r.id};`)
+
+    for (let t_r of terms_rows) {
+      terms.push({q: t_r.answer, a: t_r.question})
+    } 
+
+    modules.push({name: r.name, data: terms})
   }
   res.render('index', {modules})
 })
@@ -80,7 +96,7 @@ const remake = (text, separator = new RegExp(/\s–\s/g)) => {
   return result 
 }
 
-app.post('/add', (req, res) => {
+app.post('/add', async (req, res) => {
   let tasks;
   try {
     tasks = remake(req.body.text)
@@ -91,32 +107,26 @@ app.post('/add', (req, res) => {
     return
   }
 
-  let file = fs.readFileSync('./data.json', "utf8")
-  file = JSON.parse(file)
+  const db = await openDb()
+  const result = await db.run(`INSERT INTO Modules (name) VALUES ("${req.body.module}");`)
   for (let t of tasks) {
-    if (file.hasOwnProperty(req.body.module)) {
-      file[req.body.module].push(t)
-    } else {
-      const arr = []
-      arr.push(t)
-      file[req.body.module] = arr  
-    }
+    await db.run(`INSERT INTO Terms (answer, question, module) VALUES ("${t.q}", "${t.a}", ${result.lastID});`)
   }
-  fs.writeFileSync("./data.json", JSON.stringify(file))
   res.redirect("/")
 })
 
-app.get("/study/select", (req, res) => {
-  const file = fs.readFileSync('./data.json', "utf8")
-  const data = JSON.parse(file) 
-  res.render("st-select", {modules: Object.keys(data)})
+app.get("/study/select", async (req, res) => {
+  const db = await openDb()
+  const modules = await db.all("SELECT name FROM Modules;")
+  const names = []
+  for (let m of modules) names.push(m.name)
+  res.render("st-select", {modules: names})
 })
 
-app.get("/study/run", (req, res) => {
+app.get("/study/run", async (req, res) => {
   const selectedModule = JSON.parse(decodeURI(req.query.selected)).m
-  const file = fs.readFileSync('./data.json', "utf8")
-  const data = JSON.parse(file)
-  const tasks = data[selectedModule]
+  const db = await openDb()
+  const tasks = await db.all(`SELECT answer AS a, question AS q FROM Terms JOIN Modules WHERE Terms.module = Modules.id AND Modules.name="${selectedModule}";`)
   for (let t of tasks) {
     t.type = "typing_answer"
   }
@@ -124,20 +134,22 @@ app.get("/study/run", (req, res) => {
     res.render("study-tat2rus", {step: Number(req.query.step ?? 0), tasks, selected: selectedModule})
   }
   if (req.query.type == "russian") {
+
     res.render("study-rus2tat", {step: Number(req.query.step ?? 0), tasks, selected: selectedModule})
   }
 })
 
-app.post("/study/run", (req, res) => {
+app.post("/study/run", async (req, res) => {
   const {answer, step, selected, type} = req.body
-  const file = fs.readFileSync('./data.json', "utf8")
+/*  const file = fs.readFileSync('./data.json', "utf8")
   const data = JSON.parse(file)
-  const tasks = data[selected]
+  const tasks = data[selected]*/
+  const db = await openDb()
+  const tasks = await db.all(`SELECT answer AS a, question AS q FROM Terms JOIN Modules WHERE Terms.module = Modules.id AND Modules.name="${selected}";`)
   for (let t of tasks) {
     t.type = "typing_answer"
   }
   if (req.body.type == "tatar") {
-    console.log(answer, tasks[Number(step - 1)].q)
     if (answer !== tasks[Number(step - 1)].q) {
       res.render("mistake", {step: Number(step) - 1, tasks, selected, answer})
       return
@@ -146,7 +158,6 @@ app.post("/study/run", (req, res) => {
     return
   }
   if (req.body.type == "russian") {
-    console.log(answer, tasks[Number(step - 1)].a)
     if (answer !== tasks[Number(step - 1)].a) {
       res.render("mistake", {step: Number(step) - 1, tasks, selected, answer})
       return
