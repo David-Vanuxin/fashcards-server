@@ -7,8 +7,8 @@ block content
 			if m.length != 0 
 				table
 					caption #{m.name}
-						a.link.show-buttons(style="margin-left: 1rem;") Показать кнопки
-						a.link.show-all(style="margin-left: 1rem;", hidden) Показать все
+						//- a.link.show-buttons(style="margin-left: 1rem;") Показать кнопки
+						//- a.link.show-all(style="margin-left: 1rem;", hidden) Показать все
 					each task in m.data
 						tr
 							td #{task.q}
@@ -20,5 +20,5 @@ block content
 	div.buttons-wrapper
 		a(href='/add', class="button") Новый модуль
 
-block scripts
-	script(src="/scripts/show-hide.js")
+//- block scripts
+//- 	script(src="/scripts/show-hide.js")

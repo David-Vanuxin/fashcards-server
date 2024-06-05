@@ -21,6 +21,13 @@ app.use(express.urlencoded({ extended: false }))
 
 app.use(express.static(path.join(__dirname, 'static')))
 
+app.use('/*', (req, res, next) => {
+  res.set({
+    "Access-Control-Allow-Origin":"*"
+  })
+  next()
+})
+
 let todoes = []
 
 app.get('/', async (req, res) => {
@@ -42,6 +49,15 @@ app.get('/', async (req, res) => {
   res.render('index', {modules})
 })
 
+app.get("/module/:id", async (req, res) => {
+  const db = await openDb()
+  const terms = await db.all(`SELECT question, answer FROM Terms WHERE Terms.module=${req.params.id};`)
+  res.set({
+    "Content-Type":"application/json"
+  })
+  res.json(terms)
+})
+
 app.get('/add', (req, res) => {
   res.render('add')
 })
@@ -49,7 +65,7 @@ app.get('/add', (req, res) => {
 const getReason = string => {
   let reason = ""
   if (typeof string === "undefined") {
-    return null/*"посторонние символы"*/
+    return null
   }
   if (!string.includes("...")) {
     reason += "отсутствует разделитель; "
@@ -71,7 +87,6 @@ const getReason = string => {
 const remake = (text, separator = new RegExp(/\s–\s/g)) => {
   let res;
   res = text.replaceAll(/^!?[^а-я,А-Я]+/g, "")  
-  res = res.replaceAll(/\d+/g, "")
   res = res.replaceAll(separator, "...")
   const list = res.split("\n")
   const result = []
@@ -106,11 +121,17 @@ app.post('/add', async (req, res) => {
     res.end()
     return
   }
-
-  const db = await openDb()
-  const result = await db.run(`INSERT INTO Modules (name) VALUES ("${req.body.module}");`)
-  for (let t of tasks) {
-    await db.run(`INSERT INTO Terms (answer, question, module) VALUES ("${t.q}", "${t.a}", ${result.lastID});`)
+  try {
+    const db = await openDb()
+    const result = await db.run(`INSERT INTO Modules (name) VALUES ("${req.body.module}");`)
+    for (let t of tasks) {
+      await db.run(`INSERT INTO Terms (answer, question, module) VALUES ('${t.q}', '${t.a}', ${result.lastID});`)
+    }
+  } catch (err) {
+    console.error(err)
+    res.status(500)
+    res.end()
+    return
   }
   res.redirect("/")
 })
@@ -141,9 +162,6 @@ app.get("/study/run", async (req, res) => {
 
 app.post("/study/run", async (req, res) => {
   const {answer, step, selected, type} = req.body
-/*  const file = fs.readFileSync('./data.json', "utf8")
-  const data = JSON.parse(file)
-  const tasks = data[selected]*/
   const db = await openDb()
   const tasks = await db.all(`SELECT answer AS a, question AS q FROM Terms JOIN Modules WHERE Terms.module = Modules.id AND Modules.name="${selected}";`)
   for (let t of tasks) {
