@@ -30,22 +30,67 @@ app.use('/*', (req, res, next) => {
 
 let todoes = []
 
-app.get('/', async (req, res) => {
-  const db = await openDb()
-  const rows = await db.all("SELECT id, name FROM Modules;")
+function normalizeData(terms) {
   const modules = []
 
+  let currentModuleId = null
+  let currentModuleName = ""
+  let currentModuleData = []
+
+  for (let i = terms.length - 1; i >= 0; i--) {
+    let term = terms[i]
+
+    if (term.moduleId !== currentModuleId) {
+      if (currentModuleId !== null) {
+        currentModuleData.reverse()
+        modules.push({
+          name: currentModuleName,
+          id: currentModuleId,
+          data: currentModuleData.reverse()
+        })
+      }
+
+      currentModuleId = term.moduleId
+      currentModuleName = term.name
+      currentModuleData = []
+    }
+
+    currentModuleData.push({
+      id: term.termId,
+      q: term.answer,
+      a: term.question,
+    })
+
+    terms.pop()
+  }
+
+  modules.push({
+    name: currentModuleName,
+    id: currentModuleId,
+    data: currentModuleData
+  })
+
+  return modules.reverse()
+}
+
+app.get('/', async (req, res) => {
+  const db = await openDb()
+
+/*  const rows = await db.all("SELECT id, name FROM Modules;")
+  const modules = []
   for (let r of rows) {
     const terms = []
-
     const terms_rows = await db.all(`SELECT question, answer FROM Terms WHERE Terms.module=${r.id};`)
-
     for (let t_r of terms_rows) {
       terms.push({q: t_r.answer, a: t_r.question})
     } 
 
     modules.push({name: r.name, data: terms})
-  }
+  }*/
+
+  const terms = await db.all(`select m.id as "moduleId", m.name, t.id as "termId", t.question, t.answer from Modules m join Terms t on t.module=m.id;`)
+  const modules = normalizeData(terms)
+
   res.render('index', {modules})
 })
 
