@@ -1,41 +1,33 @@
 extends layout
 
 block content
-	h1 Режим заучивания	
+	h1 Тестирование	
 	if tasks[step].type == "typing_answer"
 		form(method="post", action="/study/run")
 			p
-				span Выберите правильный перевод для: 
+				span Выберите правильный ответ: 
 				br
 				strong #{tasks[step].a}
 			- const indexes = []
 			- 
-				for (let n = 0; n <= 3; n++) {
+				for (let n = 3; n >= 0; n--) {
 					let randomIndex = Math.floor( Math.random() * tasks.length); 			
-					indexes.push(randomIndex)
-			 		let exist = indexes.find(elem => elem === randomIndex);
-			 		if (typeof exist === "undefined") {
-			 			indexes.push(randomIndex)
-			 		}
+					let exist = indexes.find(elem => elem === randomIndex);
+					if (typeof exist === "undefined") {
+						 indexes.push(randomIndex)
+					} else {
+						n++
+						continue
+					}
 				}
-			//- 	for (let n = 3; n >= 0; n--) {
-			//- 		let randomIndex = Math.floor( Math.random() * tasks.length); 			
-			//- 		let exist = indexes.find(elem => elem === randomIndex);
-			//- 		if (typeof exist === "undefined") {
-			//- 			 indexes.push(randomIndex)
-			//- 		} else {
-			//- 			n++
-			//- 			continue
-			//- 		}
-			//- 	}
-			//- - const trueAnswerIndex = indexes.find(i => i === step)
-			//- - if (typeof trueAnswerIndex === "undefined") indexes[Math.floor( Math.random() * 3 )] = step
+			- const trueAnswerIndex = indexes.find(i => i === step)
+			- if (typeof trueAnswerIndex === "undefined") indexes[Math.floor( Math.random() * 3 )] = step
 
 			each i in indexes
 				if i >= 0 && i <= tasks.length
 					div.buttons-wrapper
-						label(for="answer")
-							input(type="radio", name="answer", value=tasks[i].q, tabindex=i)
+						label(for="a"+i.toString())
+							input(type="radio", name="answer", value=tasks[i].q, tabindex=i, id="a"+i.toString())
 							span #{tasks[i].q}
 			
 			input(hidden, value=Number(step)+1, name="step")

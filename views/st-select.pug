@@ -5,20 +5,22 @@ block content
 		h1 Заучивание
 		if modules.length != 0
 			p Выберите модуль для заучивания
+			- let i = 0
 			each m in modules
 				div.buttons-wrapper
 					if modules.length == 1
-						input(type="radio", value={m}, name="selected")
+						input(type="radio", value={m}, name="selected", id=i)
 					else
-						input(type="radio", value={m}, name="selected")
-					label(for="selected") #{m}
+						input(type="radio", value={m}, name="selected", id=i)
+					label(for=i) #{m}
+				- i++
 			p Варианты ответа:
 				div.buttons-wrapper
-					input(type="radio", value="tatar", name="type")
-					label(for="selected") Термины
+					input(type="radio", value="tatar", name="type", id="terms", checked)
+					label(for="terms") Термины
 				div.buttons-wrapper
-					input(type="radio", value="russian", name="type")
-					label(for="selected") Определения
+					input(type="radio", value="russian", name="type", id="definitions", disabled)
+					label(for="definitions") Определения
 			div.buttons-wrapper
 				input(type="submit", value="Выбрать", class="button")
 				a(class="button", href="/") Отмена
