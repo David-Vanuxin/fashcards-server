@@ -70,23 +70,15 @@ function normalizeData(terms) {
     data: currentModuleData
   })
 
+  modules.forEach((e) => {
+    e.data.reverse()
+  })
+
   return modules.reverse()
 }
 
 app.get('/', async (req, res) => {
   const db = await openDb()
-
-/*  const rows = await db.all("SELECT id, name FROM Modules;")
-  const modules = []
-  for (let r of rows) {
-    const terms = []
-    const terms_rows = await db.all(`SELECT question, answer FROM Terms WHERE Terms.module=${r.id};`)
-    for (let t_r of terms_rows) {
-      terms.push({q: t_r.answer, a: t_r.question})
-    } 
-
-    modules.push({name: r.name, data: terms})
-  }*/
 
   const terms = await db.all(`select m.id as "moduleId", m.name, t.id as "termId", t.question, t.answer from Modules m join Terms t on t.module=m.id;`)
   const modules = normalizeData(terms)
