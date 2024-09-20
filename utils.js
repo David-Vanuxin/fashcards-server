@@ -1,51 +1,4 @@
-function normalizeData(terms) {
-  const modules = []
-
-  let currentModuleId = null
-  let currentModuleName = ""
-  let currentModuleData = []
-
-  for (let i = terms.length - 1; i >= 0; i--) {
-    let term = terms[i]
-
-    if (term.moduleId !== currentModuleId) {
-      if (currentModuleId !== null) {
-        currentModuleData.reverse()
-        modules.push({
-          name: currentModuleName,
-          id: currentModuleId,
-          data: currentModuleData.reverse()
-        })
-      }
-
-      currentModuleId = term.moduleId
-      currentModuleName = term.name
-      currentModuleData = []
-    }
-
-    currentModuleData.push({
-      id: term.termId,
-      q: term.answer,
-      a: term.question,
-    })
-
-    terms.pop()
-  }
-
-  modules.push({
-    name: currentModuleName,
-    id: currentModuleId,
-    data: currentModuleData
-  })
-
-  modules.forEach((e) => {
-    e.data.reverse()
-  })
-
-  return modules.reverse()
-}
-
-const remake = (text, separator = new RegExp(/\s–\s/g)) => {
+export const remake = (text, separator = new RegExp(/\s–\s/g)) => {
   let res;
   res = text.replaceAll(/^!?[^а-я,А-Я]+/g, "")  
   res = res.replaceAll(separator, "...")
@@ -92,9 +45,4 @@ const getReason = string => {
   reason = reason + "..."
   reason = reason.replace("; ...", "")
   return reason
-}
-
-module.exports = {
-  normalizeData,
-  getReason
 }

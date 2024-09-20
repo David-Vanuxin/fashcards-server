@@ -1,12 +1,7 @@
-const path = require('path')
-const express = require('express')
-const app = express()
-const fs = require("fs")
-
-const sqlite3 = require("sqlite3")
-const {open} = require('sqlite')
-
-const utils = require("./utils.js")
+import express from 'express'
+import sqlite3 from "sqlite3"
+import {open} from 'sqlite'
+import {remake} from "./utils.js"
 
 async function openDb () {
   return open({
@@ -15,14 +10,17 @@ async function openDb () {
   })
 }
 
-app.set('views', path.join(__dirname, 'views'));
+const app = express()
+const db = await openDb()
+
+app.set('views', './views');
 app.set('view engine', 'pug');
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
-app.use(express.static(path.join(__dirname, 'static')))
+app.use(express.static('./static'))
 
 app.get('/', async (req, res) => {
-  const db = await openDb()
+  //const db = await openDb()
 
   const data = await db.all(`select json_object('name', Modules.name, 'data', json_group_array(json_object('a', Terms.question, 'q', Terms.answer))) from Terms join Modules on Terms.module=Modules.id group by Modules.id;`)
 
@@ -36,7 +34,7 @@ app.get('/', async (req, res) => {
 })
 
 app.get("/module/:id", async (req, res) => {
-  const db = await openDb()
+  //const db = await openDb()
   const terms = await db.all(`SELECT question, answer FROM Terms WHERE Terms.module=${req.params.id};`)
   res.set({
     "Content-Type":"application/json"
@@ -59,7 +57,7 @@ app.post('/add', async (req, res) => {
     return
   }
   try {
-    const db = await openDb()
+    //const db = await openDb()
     const result = await db.run(`INSERT INTO Modules (name) VALUES ("${req.body.module}");`)
     for (let t of tasks) {
       await db.run(`INSERT INTO Terms (answer, question, module) VALUES ('${t.q}', '${t.a}', ${result.lastID});`)
@@ -74,7 +72,7 @@ app.post('/add', async (req, res) => {
 })
 
 app.get("/study/select", async (req, res) => {
-  const db = await openDb()
+  //const db = await openDb()
   const modules = await db.all("SELECT name FROM Modules;")
   const names = []
   for (let m of modules) names.push(m.name)
@@ -83,7 +81,7 @@ app.get("/study/select", async (req, res) => {
 
 app.get("/study/run", async (req, res) => {
   const selectedModule = JSON.parse(decodeURI(req.query.selected)).m
-  const db = await openDb()
+  //const db = await openDb()
   const tasks = await db.all(`SELECT answer AS a, question AS q FROM Terms JOIN Modules WHERE Terms.module = Modules.id AND Modules.name="${selectedModule}";`)
   for (let t of tasks) {
     t.type = "typing_answer"
@@ -99,7 +97,7 @@ app.get("/study/run", async (req, res) => {
 
 app.post("/study/run", async (req, res) => {
   const {answer, step, selected, type} = req.body
-  const db = await openDb()
+  //const db = await openDb()
   const tasks = await db.all(`SELECT answer AS a, question AS q FROM Terms JOIN Modules WHERE Terms.module = Modules.id AND Modules.name="${selected}";`)
   for (let t of tasks) {
     t.type = "typing_answer"
