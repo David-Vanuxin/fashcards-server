@@ -6,6 +6,8 @@ const fs = require("fs")
 const sqlite3 = require("sqlite3")
 const {open} = require('sqlite')
 
+const utils = require("./utils.js")
+
 async function openDb () {
   return open({
     filename: 'data',
@@ -15,73 +17,20 @@ async function openDb () {
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
-
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
-
 app.use(express.static(path.join(__dirname, 'static')))
-
-app.use('/*', (req, res, next) => {
-  res.set({
-    "Access-Control-Allow-Origin":"*"
-  })
-  next()
-})
-
-let todoes = []
-
-function normalizeData(terms) {
-  const modules = []
-
-  let currentModuleId = null
-  let currentModuleName = ""
-  let currentModuleData = []
-
-  for (let i = terms.length - 1; i >= 0; i--) {
-    let term = terms[i]
-
-    if (term.moduleId !== currentModuleId) {
-      if (currentModuleId !== null) {
-        currentModuleData.reverse()
-        modules.push({
-          name: currentModuleName,
-          id: currentModuleId,
-          data: currentModuleData.reverse()
-        })
-      }
-
-      currentModuleId = term.moduleId
-      currentModuleName = term.name
-      currentModuleData = []
-    }
-
-    currentModuleData.push({
-      id: term.termId,
-      q: term.answer,
-      a: term.question,
-    })
-
-    terms.pop()
-  }
-
-  modules.push({
-    name: currentModuleName,
-    id: currentModuleId,
-    data: currentModuleData
-  })
-
-  modules.forEach((e) => {
-    e.data.reverse()
-  })
-
-  return modules.reverse()
-}
 
 app.get('/', async (req, res) => {
   const db = await openDb()
 
-  const terms = await db.all(`select m.id as "moduleId", m.name, t.id as "termId", t.question, t.answer from Modules m join Terms t on t.module=m.id;`)
-  const modules = normalizeData(terms)
+  const data = await db.all(`select json_object('name', Modules.name, 'data', json_group_array(json_object('a', Terms.question, 'q', Terms.answer))) from Terms join Modules on Terms.module=Modules.id group by Modules.id;`)
+
+  const modules = []
+
+  for(const termsList of data) {
+    modules.push(JSON.parse(termsList["json_object('name', Modules.name, 'data', json_group_array(json_object('a', Terms.question, 'q', Terms.answer)))"]))
+  }
 
   res.render('index', {modules})
 })
@@ -99,59 +48,10 @@ app.get('/add', (req, res) => {
   res.render('add')
 })
 
-const getReason = string => {
-  let reason = ""
-  if (typeof string === "undefined") {
-    return null
-  }
-  if (!string.includes("...")) {
-    reason += "отсутствует разделитель; "
-  }
-  if (typeof string.split("...")[0] === "undefined") {
-    reason += "отсутствует вопрос; "
-  }
-  if (typeof string.split("...")[1] === "undefined") {
-    reason += "отсутствует ответ; "
-  }
-  if (reason == "") {
-    reason = "неизвестна"
-  }
-  reason = reason + "..."
-  reason = reason.replace("; ...", "")
-  return reason
-}
-
-const remake = (text, separator = new RegExp(/\s–\s/g)) => {
-  let res;
-  res = text.replaceAll(/^!?[^а-я,А-Я]+/g, "")  
-  res = res.replaceAll(separator, "...")
-  const list = res.split("\n")
-  const result = []
-  for (let n = 0; n <= list.length; n++) {
-    let string = list[n]
-    try {
-      let splitted_string = string.split("...")
-      result.push({
-        q: splitted_string[0],
-        a: splitted_string[1].replace("\r", "")
-      })
-    } catch (err) {
-      const reason = getReason(string)
-      if (reason == null) continue
-      const new_list = []
-      Object.assign(new_list, list)
-      let sample = new_list.splice(n - 2, n + 2).join("\n")
-      sample = sample.replaceAll("...", " -> ")
-      throw new Error(`\n${sample}\nНе удалось разобрать строку: "${string}"\nПричина: ${reason}`)
-    }
-  }
-  return result 
-}
-
 app.post('/add', async (req, res) => {
   let tasks;
   try {
-    tasks = remake(req.body.text)
+    tasks = utils.remake(req.body.text)
   } catch (err) {
     res.render("error", {code: err})
     res.status(400)
@@ -219,6 +119,8 @@ app.post("/study/run", async (req, res) => {
     }
     res.render("study-rus2tat", {step, tasks, selected})
   }
-})
+});
 
-app.listen(3000, () => console.log("Server started"))
+app.listen(3000, () => console.log("Server started"));
+
+// })()
