@@ -13,7 +13,11 @@ app.use(express.urlencoded({ extended: false }))
 app.use(express.static('./static'))
 
 app.use((req, res, next) => {
-  res.set('Access-Control-Allow-Origin', '*')
+  res.set({
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': "*",
+    'Access-Control-Allow-Headers': "*",
+  })
   next()
 })
 

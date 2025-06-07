@@ -29,4 +29,30 @@ modulesRouter.get("/:id", async (req, res) => {
   res.json(terms)
 })
 
+modulesRouter.post('/', async (req, res) => {
+  if (!req.body.name) {
+    res.status(400).json({ status: "error", message: "invalid name" })
+    return
+  }
+
+  await db.run(`insert into Modules (name) values ('${req.body.name}');`)
+
+  const { id: createdModuleId } = await db.get("select id from Modules order by id desc limit 1;")
+
+  console.log(req.body.terms)
+
+  await db.run(req.body.terms.reduce((query, term) => query += `insert into Terms (answer, question, module) values ('${term.answer}', '${term.question}', ${createdModuleId});`, ""))
+
+  res.json({ status: "success", message: createdModuleId })
+})
+
+modulesRouter.delete('/:id', async (req, res) => {
+  try {
+    await db.run(`delete from Modules where id=${req.params.id};`)
+    res.json({ status: "success", message: req.params.id })
+  } catch (e) {
+    res.status(400).json({ status: "error", message: "can't delete module" })
+  }
+})
+
 export default modulesRouter
