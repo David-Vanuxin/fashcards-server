@@ -32,6 +32,7 @@ modulesRouter.get("/:id", async (req, res) => {
 modulesRouter.post('/', async (req, res) => {
   if (!req.body.name) {
     res.status(400).json({ status: "error", message: "invalid name" })
+    console.log("Invalid name", req.body.name)
     return
   }
 
@@ -39,9 +40,10 @@ modulesRouter.post('/', async (req, res) => {
 
   const { id: createdModuleId } = await db.get("select id from Modules order by id desc limit 1;")
 
-  console.log(req.body.terms)
+  const sql = req.body.terms.reduce((query, term) => 
+    query += `insert into Terms (answer, question, module) values ('${term.answer}', '${term.question}', ${createdModuleId});`, "")
 
-  await db.run(req.body.terms.reduce((query, term) => query += `insert into Terms (answer, question, module) values ('${term.answer}', '${term.question}', ${createdModuleId});`, ""))
+  await db.exec(sql)
 
   res.json({ status: "success", message: createdModuleId })
 })
@@ -52,6 +54,7 @@ modulesRouter.delete('/:id', async (req, res) => {
     res.json({ status: "success", message: req.params.id })
   } catch (e) {
     res.status(400).json({ status: "error", message: "can't delete module" })
+    console.log("Error with deleting module", req.params.id)
   }
 })
 
