@@ -58,4 +58,18 @@ modulesRouter.delete('/:id', async (req, res) => {
   }
 })
 
+
+modulesRouter.put('/:id', async (req, res) => {
+  try {
+    await db.run(`update Modules set name=${req.body.name} where id=${req.params.id};`)
+    res.json({
+      status: "success",
+      id: req.params.id,
+      name: req.body.name,
+    })
+  } catch (e) {
+    res.status(400).json({ status: "error", message: e.message })
+  }
+})
+
 export default modulesRouter
