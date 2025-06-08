@@ -5,27 +5,33 @@ const db = await openDb()
 
 const modulesRouter = express.Router()
 
-/*modulesRouter.get('/', async (req, res) => {
-
-  const modules = data.map(termList => JSON.parse(termList[JSONobj]))
-  res.json(modules)
-})*/
+modulesRouter.get('/', async (req, res) => {
+  const data = await db.all(`select id, name from Modules;`)
+  res.json(data)
+})
 
 modulesRouter.get("/:id", async (req, res) => {
   const JSONobj = `json_object( 
   'name', Modules.name, 
   'terms', json_group_array(json_object(
     'id', Terms.id,
-    'answer', Terms.question, 
-    'question', Terms.answer)
+    'answer', Terms.answer, 
+    'question', Terms.question)
     )
   )`
-  const data = await db.get(`
-  select ${JSONobj} 
-  from Terms join Modules on Terms.module=Modules.id
-  where Modules.id=${req.params.id}
-  group by Modules.id;`)
-  res.json({ status: "success", data: JSON.parse(data[JSONobj])})
+  try {
+    const data = await db.get(`
+    select ${JSONobj} 
+    from Terms join Modules on Terms.module=Modules.id
+    where Modules.id=${req.params.id}
+    group by Modules.id;`)
+    res.json({ status: "success", data: JSON.parse(data[JSONobj])})
+  } catch (e) {
+    res.status(400).json({
+      status: "error",
+      message: e.message,
+    })
+  }
 })
 
 modulesRouter.post('/', async (req, res) => {
