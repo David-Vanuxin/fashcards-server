@@ -26,9 +26,22 @@ modulesRouter.get("/:id", async (req, res) => {
     from Terms join Modules on Terms.module=Modules.id
     where Modules.id=${req.params.id}
     group by Modules.id;`)
-    res.json({ status: "success", data: JSON.parse(data[JSONobj])})
+
+    if (data) res.json({ status: "success", data: JSON.parse(data[JSONobj])})
+    else {
+      const jsonSchema = "json_object('id', Modules.id, 'name', Modules.name)"
+      const emptyModule = await db.get(
+        `select ${jsonSchema} from Modules where Modules.id=${req.params.id};`)
+
+      if (emptyModule) {
+        res.json({
+          status: "success",
+          data: {...JSON.parse(emptyModule[jsonSchema]), terms: []}
+        })
+      }
+    }
   } catch (e) {
-    res.status(400).json({
+    res.status(500).json({
       status: "error",
       message: e.message,
     })
