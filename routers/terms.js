@@ -52,9 +52,9 @@ termsRouter.put("/:id", async (req, res) => {
 
   	await db.run(`update Terms set ${query.join(", ")} where id=${req.params.id};`)
 
-  	const JSONobj = `json_object('id', Terms.id, 'answer', Terms.answer, 'question', Terms.question, module, Terms.module)`
+  	const JSONobj = `json_object('id', Terms.id, 'answer', Terms.answer, 'question', Terms.question, 'module', Terms.module)`
 
-  	const term = await db.get(`select JSONobj from Terms where id=${req.params.id};`)
+  	const term = await db.get(`select ${JSONobj} from Terms where id=${req.params.id};`)
 
     res.json({
       status: "success",

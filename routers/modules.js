@@ -11,7 +11,8 @@ modulesRouter.get('/', async (req, res) => {
 })
 
 modulesRouter.get("/:id", async (req, res) => {
-  const JSONobj = `json_object( 
+  const JSONobj = `json_object(
+  'id', Modules.id, 
   'name', Modules.name, 
   'terms', json_group_array(json_object(
     'id', Terms.id,
