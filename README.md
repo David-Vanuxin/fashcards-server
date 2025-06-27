@@ -19,4 +19,5 @@ CREATE TABLE Terms(
 	FOREIGN KEY(module) REFERENCES Modules(id));
 ```
 3. `export prod.db`
-4. `npm run start`
+4. `npm install`
+5. `npm run start`
