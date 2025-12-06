@@ -7,11 +7,8 @@ import openDb from "./db.js"
 const app = express()
 const db = await openDb()
 
-app.set('views', './views');
-app.set('view engine', 'pug');
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
-app.use(express.static('./static'))
 
 app.use((req, res, next) => {
   res.set({
