@@ -3,20 +3,12 @@
 [Код фронтенда тут](https://github.com/David-Vanuxin/flashcards)
 
 ## Запуск
-1. `sqlite3 prod.db`
-2. Создайте таблицы
+Выполните:
+```sh
+npm i && npm start
 ```
-CREATE TABLE Modules(
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	name TEXT NOT NULL);
 
-CREATE TABLE Terms(
-	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	answer TEXT NOT NULL,
-	question TEXT NOT NULL,
-	module INTEGER NOT NULL,
-	FOREIGN KEY(module) REFERENCES Modules(id));
+Если уже есть файл базы данных SQLite3, переместите его в корневой каталог и задайте переменную среды с его именем перед запуском:
+```sh
+export DATABASE=filename.db
 ```
-3. `export prod.db`
-4. `npm install`
-5. `npm run start`
