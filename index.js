@@ -5,7 +5,7 @@ import termsRouter from "./routers/terms.js"
 import openDb from "./db.js"
 
 const app = express()
-const db = await openDb()
+await openDb()
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
