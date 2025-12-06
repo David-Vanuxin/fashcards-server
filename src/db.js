@@ -6,7 +6,7 @@ const dbFilename = process.env.DATABASE || "data.db"
 
 if (process.env.DATABASE === undefined) {
   console.warn("Database file name not specified\nCreate file data.db\n")
-  createDatabase()
+  await createDatabase()
 }
 
 export default async function openDb () {
@@ -28,8 +28,9 @@ async function createDatabase() {
 
   try {
     const db = await openDb()
-    const createTablesQuery = await fs.readFile("tables.sql", 'utf8')
+    const createTablesQuery = await fs.readFile("src/tables.sql", 'utf8')
     await db.exec(createTablesQuery.toString())
+    console.log(`Database ${dbFilename} created`)
   } catch (err) {
     console.error(err.message)
   }
