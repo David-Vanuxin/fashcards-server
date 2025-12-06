@@ -1,5 +1,4 @@
 import express from 'express'
-import {remake} from "./utils.js"
 import modulesRouter from "./routers/modules.js"
 import termsRouter from "./routers/terms.js"
 import openDb from "./db.js"
