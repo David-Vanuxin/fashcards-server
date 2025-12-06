@@ -17,11 +17,14 @@ export default async function openDb () {
 }
 
 async function createDatabase() {
+  let file
   try {
-    await fs.open(dbFilename, "wx")
+    file = await fs.open(dbFilename, "wx")
   } catch (err) {
     return console.log(`File ${dbFilename} already exists`)
   }
+  
+  await file?.close()
 
   try {
     const db = await openDb()
