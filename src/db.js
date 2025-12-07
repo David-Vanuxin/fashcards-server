@@ -1,6 +1,5 @@
 import sqlite3 from "sqlite3"
 import { open } from 'sqlite'
-import { readFile } from 'node:fs/promises';
 
 const db = await open({
   filename: ":memory:",
@@ -8,8 +7,17 @@ const db = await open({
 })
 
 try {
-  const createTablesQuery = await readFile("tables.sql", 'utf8')
-  await db.exec(createTablesQuery.toString())
+  await db.exec(`CREATE TABLE Modules(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL);
+
+CREATE TABLE Terms(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  answer TEXT NOT NULL,
+  question TEXT NOT NULL,
+  module INTEGER NOT NULL,
+  FOREIGN KEY(module) REFERENCES Modules(id));`)
+  
   console.log("Tables created")
 } catch (err) {
   console.error(err.message)
