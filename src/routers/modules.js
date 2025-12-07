@@ -11,6 +11,8 @@ modulesRouter.get('/', async (req, res) => {
     res.json(data)
   } catch (err) {
     console.error(err)
+    res.status(500)
+    res.json({ status: "error", message: err.message })
   }
 })
 
