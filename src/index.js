@@ -16,6 +16,15 @@ app.use((req, res, next) => {
   next()
 })
 
+app.options("*", (req, res) => {
+  res.set({
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': "*",
+    'Access-Control-Allow-Headers': "*",
+  })
+  res.status(200).end()
+})
+
 app.use('/module', modulesRouter)
 app.use('/term', termsRouter)
 
