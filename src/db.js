@@ -1,37 +1,19 @@
 import sqlite3 from "sqlite3"
 import { open } from 'sqlite'
-import fs from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 
-const dbFilename = process.env.DATABASE || "data.db"
+const db = await open({
+  filename: ":memory:",
+  driver: sqlite3.Database
+})
 
-if (process.env.DATABASE === undefined) {
-  console.warn("Database file name not specified\nCreate file data.db\n")
-  await createDatabase()
+try {
+  const createTablesQuery = await readFile("src/tables.sql", 'utf8')
+  await db.exec(createTablesQuery.toString())
+} catch (err) {
+  console.error(err.message)
 }
 
-export default async function openDb () {
-  return open({
-    filename: dbFilename,
-    driver: sqlite3.Database
-  })
-}
-
-async function createDatabase() {
-  let file
-  try {
-    file = await fs.open(dbFilename, "wx")
-  } catch (err) {
-    return console.log(`File ${dbFilename} already exists`)
-  }
-  
-  await file?.close()
-
-  try {
-    const db = await openDb()
-    const createTablesQuery = await fs.readFile("src/tables.sql", 'utf8')
-    await db.exec(createTablesQuery.toString())
-    console.log(`Database ${dbFilename} created`)
-  } catch (err) {
-    console.error(err.message)
-  }
+export default async function openDb() {
+  return await db
 }

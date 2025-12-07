@@ -6,8 +6,12 @@ const db = await openDb()
 const modulesRouter = express.Router()
 
 modulesRouter.get('/', async (req, res) => {
-  const data = await db.all(`select id, name from Modules;`)
-  res.json(data)
+  try {
+    const data = await db.all(`select id, name from Modules;`)
+    res.json(data)
+  } catch (err) {
+    console.error(err)
+  }
 })
 
 modulesRouter.get("/:id", async (req, res) => {
