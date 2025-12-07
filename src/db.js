@@ -8,7 +8,7 @@ const db = await open({
 })
 
 try {
-  const createTablesQuery = await readFile("./src/tables.sql", 'utf8')
+  const createTablesQuery = await readFile("tables.sql", 'utf8')
   await db.exec(createTablesQuery.toString())
   console.log("Tables created")
 } catch (err) {
